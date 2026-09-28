@@ -19,7 +19,12 @@ classifiers = [
   "Programming Language :: Python :: 3.14",
   "Typing :: Typed",
 ]
-dependencies = ["dagster>=1.12,<2"]
+dependencies = [
+  "dagster==1.13.24",
+  "dagster-postgres==0.29.24",
+  "sqlalchemy==2.0.54",
+  "psycopg2-binary==2.9.13",
+]
 
 [dependency-groups]
 dev = [

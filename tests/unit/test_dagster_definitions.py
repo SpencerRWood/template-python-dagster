@@ -15,6 +15,9 @@ def test_definitions_load_and_register_examples() -> None:
     assert isinstance(defs, Definitions)
     Definitions.validate_loadable(defs)
     assert defs.resolve_job_def("example_job").name == "example_job"
+    smoke = defs.resolve_job_def("runtime_smoke_job")
+    assert smoke.execute_in_process().success
+    assert set(smoke.required_resource_keys) == {"io_manager"}
     assert defs.resolve_schedule_def("example_schedule").name == "example_schedule"
     keys = defs.resolve_asset_graph().get_all_asset_keys()
     assert {key.to_user_string() for key in keys} == {"example_message"}

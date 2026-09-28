@@ -9,3 +9,13 @@ jobs:
     uses: SpencerRWood/workflows/.github/workflows/release.yml@v1
     permissions:
       contents: write
+
+  container:
+    needs: release
+    if: needs.release.outputs.released == 'true'
+    uses: SpencerRWood/workflows/.github/workflows/container-release.yml@v1
+    permissions:
+      contents: read
+      packages: write
+    with:
+      release_tag: ${{ needs.release.outputs.release_tag }}
