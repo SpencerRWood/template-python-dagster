@@ -68,11 +68,12 @@ def test_docker_entrypoint_targets_definitions_module() -> None:
 def test_centralized_release_contract() -> None:
     workflow = (ROOT / ".github/workflows/release.yml").read_text(encoding="utf-8")
     assert "SpencerRWood/workflows/.github/workflows/release.yml@v1" in workflow
-    assert "SpencerRWood/workflows/.github/workflows/container-release.yml@v1" in workflow
+    assert (
+        "SpencerRWood/workflows/.github/workflows/container-release.yml@v1" in workflow
+    )
     release_config = tomllib.loads(
         (ROOT / ".github/release.toml").read_text(encoding="utf-8")
     )
     assert release_config["build"]["python_package"] is True
     assert release_config["release"]["semantic_release"] is True
-    assert release_config["dagster"]["runtime_validation"] is True
-    assert release_config["dagster"]["smoke_job"] == "runtime_smoke_job"
+    assert "dagster" not in release_config

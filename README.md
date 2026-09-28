@@ -80,14 +80,14 @@ The container loads `template_python_dagster.dagster.definitions` with `dagster 
 
 The consuming application owns its assets, jobs, schedules, and sensors. The shared infrastructure repository only builds/deploys the image, injects runtime environment and secrets, and registers its gRPC endpoint as a code location in the Dagster workspace. For example, infrastructure can configure a `grpc_server` entry with `host`, `port`, and `location_name` matching its deployed container; those values belong in infrastructure configuration, not this template. The shared Dagster daemon evaluates schedules and sensors registered from the application code location. Infrastructure should not duplicate their definitions.
 
-The release caller uses the centralized `SpencerRWood/workflows` release, validation, and container publishing contracts at `@v1`. `[dagster]` in `.github/release.toml` enables candidate-image validation. The shared workflow starts temporary PostgreSQL, creates PostgreSQL-backed Dagster storage, launches the image as a gRPC code server, runs `runtime_smoke_job`, and checks the run and event log in PostgreSQL. Developers supply no CI database credentials or application secrets. This tests the Dagster/PostgreSQL runtime boundary, not application-specific external APIs.
+The release caller uses the centralized `SpencerRWood/workflows` release, validation, and container publishing contracts at `@v1`. Add `[dagster]` to `.github/release.toml` after the updated shared `v1` contract is published to enable candidate-image validation. The shared workflow starts temporary PostgreSQL, creates PostgreSQL-backed Dagster storage, launches the image as a gRPC code server, runs `runtime_smoke_job`, and checks the run and event log in PostgreSQL. Developers supply no CI database credentials or application secrets. This tests the Dagster/PostgreSQL runtime boundary, not application-specific external APIs.
 
 ## Copy and rename
 
 1. Create a new repository and copy this template's tracked files.
 2. Replace `template-python-dagster` with the new distribution/repository name and `template_python_dagster` with the new import package name in `pyproject.toml`, `src/`, `tests/`, `Dockerfile`, `.github/`, and this README. Rename the package directory. Keep the module path in the Docker command and local Dagster command aligned.
 3. Update the package description, runtime settings, assets, resources, jobs, schedules, and sensors for the application. Remove unused examples and their `Definitions` entries; retain the smoke job.
-4. Keep `[dagster].runtime_validation = true` and `smoke_job = "runtime_smoke_job"` in `.github/release.toml`. Run `uv lock`, `uv sync --frozen --group dev`, and the quality gates above. Push and release normally.
+4. Add `[dagster]` with `runtime_validation = true` to `.github/release.toml`; `smoke_job` defaults to `runtime_smoke_job`. Run `uv lock`, `uv sync --frozen --group dev`, and the quality gates above. Push and release normally.
 
 The template owns dependencies and the smoke definition. `SpencerRWood/workflows` owns the candidate-image runtime proof. Infrastructure owns the deployed code-location host, port, and environment contract.
 

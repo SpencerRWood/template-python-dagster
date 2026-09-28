@@ -9,9 +9,5 @@ checks = ["ruff", "ruff-format", "mypy", "pytest", "pre-commit"]
 [build]
 python_package = true
 
-[dagster]
-runtime_validation = true
-smoke_job = "runtime_smoke_job"
-
 [release]
 semantic_release = true
