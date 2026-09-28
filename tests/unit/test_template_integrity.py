@@ -3,6 +3,8 @@ from importlib import import_module
 from pathlib import Path
 from typing import Any
 
+from packaging.requirements import Requirement
+
 ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -23,7 +25,24 @@ def test_template_project_metadata_describes_scaffold() -> None:
     assert project["name"] == "template-python-dagster"
     assert project["description"].startswith("A typed Python template for Dagster")
     assert project["requires-python"] == ">=3.14"
-    assert "dagster>=1.12,<2" in project["dependencies"]
+    requirements = {
+        Requirement(item).name: Requirement(item) for item in project["dependencies"]
+    }
+    assert {
+        "dagster",
+        "dagster-postgres",
+        "sqlalchemy",
+        "psycopg2-binary",
+    } <= requirements.keys()
+    assert "psycopg" not in requirements
+    assert str(requirements["dagster"].specifier) == "==1.13.24"
+    assert str(requirements["dagster-postgres"].specifier) == "==0.29.24"
+    assert str(requirements["sqlalchemy"].specifier) == "==2.0.54"
+    assert str(requirements["psycopg2-binary"].specifier) == "==2.9.13"
+    lock = tomllib.loads((ROOT / "uv.lock").read_text(encoding="utf-8"))
+    locked = {package["name"] for package in lock["package"]}
+    assert "psycopg2-binary" in locked
+    assert "psycopg" not in locked
 
 
 def test_template_declares_typed_src_package() -> None:
@@ -49,8 +68,11 @@ def test_docker_entrypoint_targets_definitions_module() -> None:
 def test_centralized_release_contract() -> None:
     workflow = (ROOT / ".github/workflows/release.yml").read_text(encoding="utf-8")
     assert "SpencerRWood/workflows/.github/workflows/release.yml@v1" in workflow
+    assert "SpencerRWood/workflows/.github/workflows/container-release.yml@v1" in workflow
     release_config = tomllib.loads(
         (ROOT / ".github/release.toml").read_text(encoding="utf-8")
     )
     assert release_config["build"]["python_package"] is True
     assert release_config["release"]["semantic_release"] is True
+    assert release_config["dagster"]["runtime_validation"] is True
+    assert release_config["dagster"]["smoke_job"] == "runtime_smoke_job"
