@@ -1,3 +1,4 @@
+import re
 import tomllib
 from importlib import import_module
 from pathlib import Path
@@ -48,7 +49,9 @@ def test_docker_entrypoint_targets_definitions_module() -> None:
 
 def test_centralized_release_contract() -> None:
     workflow = (ROOT / ".github/workflows/release.yml").read_text(encoding="utf-8")
-    assert "SpencerRWood/workflows/.github/workflows/release.yml@v1" in workflow
+    assert re.search(
+        r"SpencerRWood/workflows/\.github/workflows/release\.yml@[a-f0-9]{40}", workflow
+    )
     release_config = tomllib.loads(
         (ROOT / ".github/release.toml").read_text(encoding="utf-8")
     )
